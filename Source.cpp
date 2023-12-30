@@ -1,72 +1,79 @@
 #include <iostream>
-#include <fstream>
+#include <vector>
+#include <cmath>
 #include<Windows.h>
+#include<algorithm>
+
+using namespace std;
+
+void error()
+{
+    cout << "Некорректные данные" << endl;
+}
 
 int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    int n;
 
-    std::string filename = "answers.txt";
+    do
+    {
+        cout << "Colichestvo veshei: "; // Ввод количества вещей
+        cin >> n;
+        // Проверка на правильность ввода
+        cin.clear();
+        cin.sync();
+        cin.ignore(1000, '\n');
+        if (cin.fail() || n <= 0)
+            error();
+    } while (n <= 0 || cin.fail());
 
-    // Считываем ответы пользователя и записываем в файл
-    std::ofstream file;
-    file.open(filename, std::ios::binary);
 
-    if (!file.is_open()) {
-        std::cout << "Ошибка при открытии файла" << std::endl;
-        return 1;
+    vector<double> weights(n);
+
+    // Ввод весов вещей
+    cout << "Ves kagdoi veshi:\n";
+    for (int i = 0; i < n; ++i) {
+        do
+        {
+            cout << "Ves veshi  " << i + 1 << ": ";
+            cin >> weights[i];
+
+            cin.clear();
+            cin.sync();
+            cin.ignore(1000, '\n');
+            if (cin.fail() || weights[i] <= 0)
+                error();
+        } while (weights[i] <= 0 || cin.fail());
     }
 
-    std::string questions[8] = {
-        "Вам нравится программирование?",
-        "Вы знакомы с языком программирования C++?",
-        "Вам нравится C++?",
-        "Вы готовы учиться и развиваться в области программирования?",
-        "Вам нравится решать сложные задачи?",
-        "Вы эффективно управляете своим временем?",
-        "Вы готовы работать в команде разработчиков?",
-        "Вам нравится создавать новые программы и приложения?"
-    };
+    // Сортировка весов вещей по убыванию
+    sort(weights.rbegin(), weights.rend());
 
-    std::string answers[8];
+    double totalWeight = 0;
 
-    for (int i = 0; i < 8; i++) {
-        std::cout << questions[i] << " (да/нет): ";
-        std::cin >> answers[i];
-
-        answers[i] = (answers[i] == "да" || answers[i] == "Да" || answers[i] == "ДА") ? "да" : "нет";
-
-        file.write(answers[i].c_str(), 1);
+    // Вычисление общего веса вещей
+    for (const auto& weight : weights) {
+        totalWeight += weight;
     }
 
-    file.close();
-    std::cout << "Ответы записаны в файл " << filename << std::endl;
+    double backpack1Weight = 0;
+    double backpack2Weight = 0;
 
-    // Пользователь может изменить свои ответы после окончания работы программы
-    std::cout << "Вы хотите изменить свои ответы? (да/нет): ";
-    std::string changeAnswer;
-    std::cin >> changeAnswer;
-
-    if (changeAnswer == "да" || changeAnswer == "Да" || changeAnswer == "ДА") {
-        file.open(filename, std::ios::out | std::ios::trunc);
-
-        if (!file.is_open()) {
-            std::cout << "Ошибка при открытии файла" << std::endl;
-            return 1;
+    // Распределение вещей по рюкзакам
+    for (const auto& weight : weights) {
+        if (backpack1Weight <= backpack2Weight) {
+            backpack1Weight += weight;
         }
-
-        for (int i = 0; i < 8; i++) {
-            std::cout << questions[i] << " (да/нет): ";
-            std::cin >> answers[i];
-
-            answers[i] = (answers[i] == "да" || answers[i] == "Да" || answers[i] == "ДА") ? "да" : "нет";
-
-            file.write(answers[i].c_str(), 1);
+        else {
+            backpack2Weight += weight;
         }
-
-        file.close();
-        std::cout << "Ваши новые ответы записаны в файл " << filename << std::endl;
     }
+
+    // Вывод результатов
+    cout << "Pykzak 1: " << backpack1Weight << " kg\n";
+    cout << "Pykzak 2: " << backpack2Weight << " kg\n";
+
+    // Вывод разницы весов
+    cout << "Paznitca vesov: " << fabs(backpack1Weight - backpack2Weight) << " kg\n";
 
     return 0;
 }
